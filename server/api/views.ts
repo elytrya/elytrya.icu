@@ -1,18 +1,31 @@
-import { Redis } from "@upstash/redis";
+import { Redis as UpstashRedis } from "@upstash/redis";
+import IORedis from "ioredis";
 
-let redis: Redis | null = null;
-let redisChecked = false;
-
-function getRedis(): Redis | null {
-  if (redisChecked) return redis;
-  redisChecked = true;
+let rest: UpstashRedis | null = null;
+let restChecked = false;
+function getRest(): UpstashRedis | null {
+  if (restChecked) return rest;
+  restChecked = true;
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const token =
     process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) {
-    redis = new Redis({ url, token });
+  if (url && token) rest = new UpstashRedis({ url, token });
+  return rest;
+}
+
+let tcp: IORedis | null = null;
+let tcpChecked = false;
+function getTcp(): IORedis | null {
+  if (tcpChecked) return tcp;
+  tcpChecked = true;
+  const url = process.env.REDIS_URL || process.env.KV_URL;
+  if (url) {
+    tcp = new IORedis(url, {
+      maxRetriesPerRequest: 3,
+      lazyConnect: false,
+    });
   }
-  return redis;
+  return tcp;
 }
 
 export default defineEventHandler(async (event) => {
@@ -30,12 +43,21 @@ export default defineEventHandler(async (event) => {
 
   setHeader(event, "cache-control", "no-store");
 
-  const client = getRedis();
-  if (client) {
-    const total = await client.incr("views:total");
+  const restClient = getRest();
+  if (restClient) {
+    const total = await restClient.incr("views:total");
     const unique = isNewVisitor
-      ? await client.incr("views:unique")
-      : ((await client.get<number>("views:unique")) ?? 0);
+      ? await restClient.incr("views:unique")
+      : ((await restClient.get<number>("views:unique")) ?? 0);
+    return { total, unique };
+  }
+
+  const tcpClient = getTcp();
+  if (tcpClient) {
+    const total = await tcpClient.incr("views:total");
+    const unique = isNewVisitor
+      ? await tcpClient.incr("views:unique")
+      : Number((await tcpClient.get("views:unique")) ?? 0);
     return { total, unique };
   }
 
