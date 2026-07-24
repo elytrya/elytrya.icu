@@ -58,7 +58,7 @@ export const messages = {
     "hero.codetime": "spent coding",
     "hero.title": "i make bots, tools and plugins.",
     "hero.bio":
-      "telegram bots with personality, handy clis, and minecraft mods. mostly python, java and ts.",
+      "telegram bots with personality, handy clis, and minecraft mods. mostly python, java and typescript.",
     "stack.label": "i write with",
     "work.label": "opensource projects",
     "about.label": "about",

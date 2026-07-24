@@ -1,6 +1,6 @@
 # elytrya.icu
 
-личный сайт визитка на nuxt
+личный сайт визитка на nuxt (е)
 
 ## стек
 
@@ -17,4 +17,4 @@
 bun i
 bun run dev
 ```
-откроется на http://localhost:3000 
+откроется на http://localhost:3000

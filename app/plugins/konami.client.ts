@@ -55,6 +55,7 @@ export default defineNuxtPlugin(() => {
   function fire() {
     if (active) return;
     active = true;
+    toast("\u{1F389} achievement unlocked - konami");
     if (!reduced()) {
       rain();
       const root = document.documentElement;
